@@ -1,48 +1,46 @@
 ---
-# Java Application Deployment with Resource Requests
+# MySQL Deployment with Resource Requests
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: bankapp
+  name: mysql
 spec:
-  replicas: 1
   selector:
     matchLabels:
-      app: bankapp
+      app: mysql
+  strategy:
+    type: Recreate
   template:
     metadata:
       labels:
-        app: bankapp
+        app: mysql
     spec:
       containers:
-      - name: bankapp
-        image: adijaiswal/bankapp:latest
-        ports:
-        - containerPort: 8080
+      - image: mysql:8
+        name: mysql
         env:
-        - name: SPRING_DATASOURCE_URL
-          value: jdbc:mysql://mysql-service:3306/bankappdb?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-        - name: SPRING_DATASOURCE_USERNAME
-          value: root
-        - name: SPRING_DATASOURCE_PASSWORD
-          value: Test@123
+        - name: MYSQL_ROOT_PASSWORD
+          value: "Test@123"
+        - name: MYSQL_DATABASE
+          value: "bankappdb"
+        ports:
+        - containerPort: 3306
+          name: mysql
         resources:
           requests:
-            memory: "500Mi"
+            memory: "1Gi"
             cpu: "500m"
           limits:
-            memory: "1000Mi"
+            memory: "2Gi"
             cpu: "1000m"
 ---
-# Bank Application Service
+# MySQL Service
 apiVersion: v1
 kind: Service
 metadata:
-  name: bankapp-service
+  name: mysql-service
 spec:
-  type: LoadBalancer
   ports:
-  - port: 80
-    targetPort: 8080
+  - port: 3306
   selector:
-    app: bankapp
+    app: mysql
